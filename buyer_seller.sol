@@ -83,6 +83,36 @@ contract BookStore {
         b.owner.transfer(b.price);
     }
 
-    
+    function markOrderCompleted(uint256 _id) public {
+        //Order memory order = orderById[_id];
+        //Book memory book = bookById[_id];
+        require(book.owner == msg.sender, 'Only the seller can mark the order as completed');
+        order.state = 'completed';
+        address customer = order.customer;
+        // Delete the seller order from the array of pending orders
+        for(uint256 i = 0; i < pendingSellerOrders[book.owner].length; i++) {
+            if(pendingSellerOrders[book.owner][i].id == _id) {
+                Order memory lastElement = orderById[lastPendingSellerOrder];
+                pendingSellerOrders[book.owner][i] = lastElement;
+                pendingSellerOrders[book.owner].length--;
+                lastPendingSellerOrder--;
+            }
+        }
+        // Delete the seller order from the array of pending orders
+        for(uint256 i = 0; i < pendingBuyerOrders[msg.sender].length; i++) {
+            if(pendingBuyerOrders[msg.sender][i].id == order.id) {
+                Order memory lastElement = orderById[lastPendingBuyerOrder];
+                pendingBuyerOrders[msg.sender][i] = lastElement;
+                pendingBuyerOrders[msg.sender].length--;
+                lastPendingBuyerOrder--;
+            }
+        }
+        completedSellerOrders[book.owner].push(order);
+        completedBuyerOrders[msg.sender].push(order);
+        orderById[_id] = order;
+        book.owner = customer;
+        book.previousOwners.push(msg.sender);
+    }
+
 
 }
