@@ -71,7 +71,7 @@ contract IERC721 is IERC165 {
     function isApprovedForAll(address owner, address operator) public view returns (bool);
     function transferFrom(address from, address to, uint256 tokenId) public;
     function safeTransferFrom(address from, address to, uint256 tokenId) public;
-    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public;
+    function safeTransferFromWithData(address from, address to, uint256 tokenId, bytes memory data) public;
 }
 
 contract IERC721Receiver {
@@ -104,7 +104,7 @@ contract ERC721 is ERC165, IERC721 {
     mapping (uint256 => address) private _tokenApprovals;
     mapping (address => Counters.Counter) private _ownedTokensCount;
     mapping (address => mapping (address => bool)) private _operatorApprovals;
-    bytes4 private constant _INTERFACE_ID_ERC721 = 0x80ac58cd;
+    bytes4 private _INTERFACE_ID_ERC721 = runtimeId();
     constructor () public {
         _registerInterface(_INTERFACE_ID_ERC721);
     }
@@ -141,9 +141,9 @@ contract ERC721 is ERC165, IERC721 {
         _transferFrom(from, to, tokenId);
     }
     function safeTransferFrom(address from, address to, uint256 tokenId) public {
-        safeTransferFrom(from, to, tokenId, "");
+        safeTransferFromWithData(from, to, tokenId, "");
     }
-    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public {
+    function safeTransferFromWithData(address from, address to, uint256 tokenId, bytes memory _data) public {
         transferFrom(from, to, tokenId);
         require(_checkOnERC721Received(from, to, tokenId, _data));
     }
@@ -194,5 +194,17 @@ contract ERC721 is ERC165, IERC721 {
         if (_tokenApprovals[tokenId] != address(0)) {
             _tokenApprovals[tokenId] = address(0);
         }
+    }
+    
+    function runtimeId() public pure returns (bytes4) {
+        return this.balanceOf.selector
+            ^ this.ownerOf.selector
+            ^ this.approve.selector
+            ^ this.getApproved.selector
+            ^ this.setApprovalForAll.selector
+            ^ this.isApprovedForAll.selector
+            ^ this.transferFrom.selector
+            ^ this.safeTransferFrom.selector
+            ^ this.safeTransferFromWithData.selector;
     }
 }
