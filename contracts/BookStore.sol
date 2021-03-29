@@ -164,7 +164,11 @@ contract BookStore {
         previousOwners[_id].push(msg.sender);
     }
 
-    function getBookIds(uint256 _limit) public view returns (uint256[] memory) {
+    function getBooksIds(uint256 _limit)
+        public
+        view
+        returns (uint256[] memory)
+    {
         uint256 length = books.length;
         uint256 counter = (_limit > length) ? length : _limit; // If you're requesting more books than available, return only the available
         uint256 condition = (_limit > length) ? 0 : (length - _limit);
