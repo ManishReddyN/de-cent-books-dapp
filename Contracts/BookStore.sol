@@ -32,6 +32,7 @@ contract BookStore {
         address payable owner; 
         uint256 price;
         bool forSale;
+        string image;
     }
     struct Order {
         uint256 id;
@@ -63,7 +64,7 @@ contract BookStore {
         token = _token;
     }
     
-    function addBook(string memory _title, string memory _isbn, string memory _author, string memory _category, uint256 _price, bool _forSale) public{
+    function addBook(string memory _title, string memory _isbn, string memory _author, string memory _category, uint256 _price, bool _forSale, string memory _image) public{
         require(bytes(_title).length>0,'Book Name is necessary');
         require(bytes(_isbn).length>0,'ISBN is necessary');
         require(bytes(_author).length>0,'Author Name is necessary');
@@ -71,7 +72,7 @@ contract BookStore {
         if(!(_forSale)) _forSale = false;
         address payable owner = msg.sender;
 
-        Book memory b = Book(lastId,_title,_isbn,_author,_category,owner,_price,_forSale);
+        Book memory b = Book(lastId,_title,_isbn,_author,_category,owner,_price,_forSale,_image);
         books.push(b);
         sellerProducts[msg.sender].push(b);
         bookById[lastId]=b;
@@ -138,4 +139,103 @@ contract BookStore {
         book.owner = address(uint160(customer));
         previousOwners[_id].push(msg.sender);
     }
+
+    function getBookIds(uint256 _limit) public view returns(uint256[] memory) {
+        
+        uint256 length = books.length;
+        uint256 counter = (_limit > length) ? length : _limit; // If you're requesting more books than available, return only the available
+        uint256 condition = (_limit > length) ? 0 : (length - _limit); 
+        uint256[] memory ids = new uint256[](_limit > length ? _limit : length);
+        uint256 increment = 0;
+        // Loop backwards to get the most recent products first
+        for(int256 i = int256(counter); i >= int256(condition); i--) {
+            ids[increment] = books[uint256(i)].id;
+        }
+        return ids;
+    }
+
+    function getBook(uint256 _id) public view returns(uint256 id, string memory title, string memory isbn, string author, string category, address payable owner,unit256 price,bool forSale ,string memory image) {
+        Book memory b = bookById[_id];
+        id = b.id;
+        title = b.title;
+        isbn = b.isbn;
+        author = b.author;
+        category = b.category;
+        owner = b.owner;
+        price = p.price;
+        forSale = b.forSale;
+        image = p.image;
+    }
+
+    function getBookIds(string memory _type, uint256 _limit) public view returns(uint256[] memory) {
+        uint256 length;
+        uint256 counter;
+        uint256 condition;
+        uint256[] memory ids;
+        uint256 increment = 0;
+        address _owner = msg.sender;
+
+        if(compareStrings(_type, 'pending-seller')) {
+            length = pendingSellerOrders[_owner].length;
+            counter = (_amount > length) ? length : _amount;
+            condition = (_amount > length) ? 0 : (length - _amount);
+            ids = new uint256[](_amount > length ? _amount : length);
+            for(int256 i = int256(counter); i >= int256(condition); i--) {
+                ids[increment] = uint256(pendingSellerOrders[_owner][uint256(i)].id);
+            }
+        } else if(compareStrings(_type, 'pending-buyer')) {
+            length = pendingBuyerOrders[_owner].length;
+            counter = (_amount > length) ? length : _amount;
+            condition = (_amount > length) ? 0 : (length - _amount);
+            ids = new uint256[](_amount > length ? _amount : length);
+            for(int256 i = int256(counter); i >= int256(condition); i--) {
+                ids[increment] = uint256(pendingBuyerOrders[_owner][uint256(i)].id);
+            }
+        } else if(compareStrings(_type, 'completed-seller')) {
+            length = completedSellerOrders[_owner].length;
+            counter = (_amount > length) ? length : _amount;
+            condition = (_amount > length) ? 0 : (length - _amount);
+            ids = new uint256[](_amount > length ? _amount : length);
+            for(int256 i = int256(counter); i >= int256(condition); i--) {
+                ids[increment] = uint256(completedSellerOrders[_owner][uint256(i)].id);
+            }
+        } else if(compareStrings(_type, 'completed-buyer')) {
+            length = completedBuyerOrders[_owner].length;
+            counter = (_amount > length) ? length : _amount;
+            condition = (_amount > length) ? 0 : (length - _amount);
+            ids = new uint256[](_amount > length ? _amount : length);
+            for(int256 i = int256(counter); i >= int256(condition); i--) {
+                ids[increment] = uint256(completedBuyerOrders[_owner][uint256(i)].id);
+            }
+        }
+
+        return ids;
+    }
+
+    function getOrder(string memory _type, uint256 _id) public view returns(uint256 id, string memory name, string memory deliveryAddress, unit256 postalCode, unit256 phone, string memory state,address customer) {
+        Order memory o;
+        address _owner = msg.sender;
+        if(compareStrings(_type, 'pending-seller')) {
+            o = pendingSellerOrders[_owner][_id];
+        } else if(compareStrings(_type, 'pending-buyer')) {
+            o = pendingBuyerOrders[_owner][_id];
+        } else if(compareStrings(_type, 'completed-seller')) {
+            o = completedSellerOrders[_owner][_id];
+        } else if(compareStrings(_type, 'completed-buyer')) {
+            o = completedBuyerOrders[_owner][_id];
+        }
+
+        id = o.id;
+        name = o.name;
+        deliveryAddress = o.deliveryAddress;
+        postalCode = o.postalCode;
+        phone = o.phone;
+        state = o.state;
+    }
+
+
+    function compareStrings(string memory a, string memory b) public pure returns (bool) {
+       return keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b));
+    }
+
 }
