@@ -1,18 +1,18 @@
-##Steps to Run the Backend locally
+## Steps to Run the Backend locally
 
-###Install Truffle and Ganache-Cli on the machine
+### Install Truffle and Ganache-Cli on the machine
  (Assuming that Node is already installed)
 
 ```bash
 npm install -g truffle 
 npm install -g ganache-cli
 ```
-###Cloning Latest Updates
+### Cloning Latest Updates
 
 ```bash
 git clone https://github.com/iamneowise/Blockchain-Buyer-Seller-Market-BC_Team_6.git
 ```
-###Deploying in your Machine
+### Deploying in your Machine
 
 Go into Truffle Console by 
 ```bash
@@ -24,7 +24,7 @@ Use the migrate command to run migrations(if not done before)
 truffle(develop)> migrate
 ```
 
-##Output
+## Output
 ```text
 truffle(develop)> migrate
 
@@ -92,7 +92,7 @@ Summary
 - Blocks: 0            Seconds: 0
 - Saving migration to chain.
 ```
-###Create a BookStore Contract instance.
+### Create a BookStore Contract instance.
 ```bash
 truffle(develop)> BookStore.deployed().then(function(instance){app=instance})
 ```
@@ -101,13 +101,13 @@ You can use the following command to verify
 truffle(develop)> app
 ```
 
-###Now that you have the Contract instance, you can call the functions in the contract as follows
+### Now that you have the Contract instance, you can call the functions in the contract as follows
 e.g. Adding A Book to the Block
 ```bash
 truffle(develop)> app.addBook("Test","Testt","Sameer","Fiction",12367,false);
 ```
 
-###Output
+### Output
 ```text
 {
   tx: '0x2a86a2bb60c55b081b7b82edf73d7c24cb30eb939d9da3f7aaa0cef82bcfa627',
