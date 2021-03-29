@@ -29,8 +29,7 @@ contract BookStore {
         string isbn;
         string author;
         string category;
-        address payable owner;
-        address[] previousOwners;  
+        address payable owner; 
         uint256 price;
         bool forSale;
     }
@@ -50,6 +49,7 @@ contract BookStore {
     mapping(address => Order[]) public completedSellerOrders; // Seller address => orders  A history of past orders fulfilled by the seller
     mapping(address => Order[]) public completedBuyerOrders; // Buyer address => orders A history of past orders made by this buyer
     mapping(uint256 => Book) public bookById; // Book id => book
+    mapping(uint256 => address[]) public previousOwners; // Book id => previousOwners
     mapping(uint256 => Order) public orderById; // book id => order
     mapping(uint256 => bool) public bookExists; // Book id => true or false
     Book[] public books;
@@ -68,9 +68,10 @@ contract BookStore {
         require(bytes(_isbn).length>0,'ISBN is necessary');
         require(bytes(_author).length>0,'Author Name is necessary');
         require(_price>0,'Price is necessary');
-        if(bytes(_forSale).length<=0) _forSale = false;
+        if(!(_forSale)) _forSale = false;
+        address payable owner = msg.sender;
 
-        Book memory b = Book(lastId,_title,_isbn,_author,_category,_price,_forSale);
+        Book memory b = Book(lastId,_title,_isbn,_author,_category,owner,_price,_forSale);
         books.push(b);
         sellerProducts[msg.sender].push(b);
         bookById[lastId]=b;
@@ -81,8 +82,7 @@ contract BookStore {
 
     function sellBook(uint256 _id) public{
         require(_id>=0,'ID is necessary');
-        Book b = bookById[_id];
-        b.forSale=true;
+        bookById[_id].forSale=true;
     }
 
 
@@ -94,7 +94,7 @@ contract BookStore {
         require(_postalCode > 0, 'The postal code must be set');
         require(_phone > 0, 'The Phone Number must be set');
 
-        //Book memory b = bookById[_id]; Need to retrieve the book by it's id. 
+        Book memory b = bookById[_id]; //Need to retrieve the book by it's id. 
         Order memory newOrder = Order(_id, _name, _deliveryAddress, _postalCode, _phone, 'pending',msg.sender);
         require(msg.value >= b.price, "The payment must be equal to the book price");
 
@@ -109,8 +109,8 @@ contract BookStore {
     }
 
     function markOrderCompleted(uint256 _id) public {
-        //Order memory order = orderById[_id];
-        //Book memory book = bookById[_id];
+        Order memory order = orderById[_id];
+        Book memory book = bookById[_id];
         require(book.owner == msg.sender, 'Only the seller can mark the order as completed');
         order.state = 'completed';
         address customer = order.customer;
@@ -135,7 +135,7 @@ contract BookStore {
         completedSellerOrders[book.owner].push(order);
         completedBuyerOrders[msg.sender].push(order);
         orderById[_id] = order;
-        book.owner = customer;
-        book.previousOwners.push(msg.sender);
+        book.owner = address(uint160(customer));
+        previousOwners[_id].push(msg.sender);
     }
 }
