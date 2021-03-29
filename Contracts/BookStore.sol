@@ -212,7 +212,7 @@ contract BookStore {
         return ids;
     }
 
-    function getOrder(string memory _type, uint256 _id) public view returns(uint256 id, string memory name, string memory deliveryAddress, unit256 postalCode, unit256 phone, string memory state,address customer) {
+    function getOrder(string memory _type, uint256 _id) public view returns(uint256 id, string memory name, string memory deliveryAddress, uint256 postalCode, uint256 phone, string memory state,address customer) {
         Order memory o;
         address _owner = msg.sender;
         if(compareStrings(_type, 'pending-seller')) {
