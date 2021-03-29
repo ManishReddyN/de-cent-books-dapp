@@ -1,3 +1,5 @@
+# README
+
 ## Steps to Run the Backend locally
 
 ### Install Truffle and Ganache-Cli on the machine
@@ -24,7 +26,7 @@ Use the migrate command to run migrations(if not done before)
 truffle(develop)> migrate
 ```
 
-## Output
+#### Output
 ```text
 truffle(develop)> migrate
 
@@ -107,7 +109,7 @@ e.g. Adding A Book to the Block
 truffle(develop)> app.addBook("Test","Testt","Sameer","Fiction",12367,false);
 ```
 
-### Output
+#### Output
 ```text
 {
   tx: '0x2a86a2bb60c55b081b7b82edf73d7c24cb30eb939d9da3f7aaa0cef82bcfa627',
