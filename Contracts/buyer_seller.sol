@@ -45,13 +45,13 @@ contract BookStore {
     }
     
     mapping(address => Book[]) public sellerProducts; // Seller address => books ; The books added by the seller 
-    mapping(address => Order[]) public pendingSellerOrders; // Seller address => books ; The books waiting to be fulfilled by the seller, used by sellers to check which orders have to be fulfilled
-    mapping(address => Order[]) public pendingBuyerOrders; //Buyer address => books ;The books that the buyer purchased waiting to be sent
-    mapping(address => Order[]) public completedSellerOrders; // Seller address => books  A history of past orders fulfilled by the seller
-    mapping(address => Order[]) public completedBuyerOrders; // Buyer address => products A history of past orders made by this buyer
-    mapping(uint256 => Book) public productById; // Book id => book
+    mapping(address => Order[]) public pendingSellerOrders; // Seller address => orders ; The books waiting to be fulfilled by the seller, used by sellers to check which orders have to be fulfilled
+    mapping(address => Order[]) public pendingBuyerOrders; //Buyer address => orders ;The books that the buyer purchased waiting to be sent
+    mapping(address => Order[]) public completedSellerOrders; // Seller address => orders  A history of past orders fulfilled by the seller
+    mapping(address => Order[]) public completedBuyerOrders; // Buyer address => orders A history of past orders made by this buyer
+    mapping(uint256 => Book) public bookById; // Book id => book
     mapping(uint256 => Order) public orderById; // book id => order
-    mapping(uint256 => bool) public productExists; // Product id => true or false
+    mapping(uint256 => bool) public bookExists; // Book id => true or false
     Book[] public books;
     Order[] public orders;
     uint256 public lastId;
@@ -64,7 +64,7 @@ contract BookStore {
     }
     
     function buyBook(uint256 _id, string memory _name, string memory _deliveryAddress, uint256 _postalCode, uint256 _phone) public payable {
-        require(productExists[_id], 'The product must exist to be purchased');
+        require(bookExists[_id], 'The book must exist to be purchased');
         require(bytes(_name).length > 0, 'The name must be set');
         require(bytes(_deliveryAddress).length > 0, 'The Delivery Address must be set');
         require(_postalCode > 0, 'The postal code must be set');
@@ -80,7 +80,7 @@ contract BookStore {
         orderById[_id] = newOrder;
         lastPendingSellerOrder = pendingSellerOrders[b.owner].length > 0 ? pendingSellerOrders[b.owner].length - 1 : 0;
         lastPendingBuyerOrder = pendingBuyerOrders[b.owner].length > 0 ? pendingBuyerOrders[b.owner].length - 1 : 0;
-        EcommerceToken(token).transferFrom(b.owner, msg.sender, _id); // Transfer the product token to the new owner
+        BookToken(token).transferFrom(b.owner, msg.sender, _id); // Transfer the book token to the new owner
         b.owner.transfer(b.price);
     }
 
