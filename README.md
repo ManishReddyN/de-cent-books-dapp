@@ -106,7 +106,7 @@ truffle(develop)> app
 ### Now that you have the Contract instance, you can call the functions in the contract as follows
 e.g. Adding A Book to the Block
 ```bash
-truffle(develop)> app.addBook("Test","Testt","Sameer","Fiction",12367,false);
+truffle(develop)> app.addBook("Test","Testt","Sameer","Fiction",12367,false,"https://www.google.com/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FMetaMask&psig=AOvVaw01YKJ1Z0HUnd4AxTrJCq9u&ust=1617105710033000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMCQg6261e8CFQAAAAAdAAAAABAD");
 ```
 
 #### Output
