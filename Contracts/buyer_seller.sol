@@ -28,6 +28,7 @@ contract BookStore {
         string title;
         string isbn;
         string author;
+        string category;
         address payable owner;
         address[] previousOwners;  
         uint256 price;
@@ -113,6 +114,4 @@ contract BookStore {
         book.owner = customer;
         book.previousOwners.push(msg.sender);
     }
-
-
 }
