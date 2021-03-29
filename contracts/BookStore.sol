@@ -43,15 +43,7 @@ contract BookStore {
         token = _token;
     }
 
-    function addBook(
-        string memory _title,
-        string memory _isbn,
-        string memory _author,
-        string memory _category,
-        uint256 _price,
-        bool _forSale,
-        string memory _image
-    ) public {
+    function addBook(string memory _title, string memory _isbn, string memory _author, string memory _category, uint256 _price, bool _forSale, string memory _image) public {
         require(bytes(_title).length > 0, "Book Name is necessary");
         require(bytes(_isbn).length > 0, "ISBN is necessary");
         require(bytes(_author).length > 0, "Author Name is necessary");
@@ -59,18 +51,7 @@ contract BookStore {
         if (!(_forSale)) _forSale = false;
         address payable owner = msg.sender;
 
-        Book memory b =
-            Book(
-                lastId,
-                _title,
-                _isbn,
-                _author,
-                _category,
-                owner,
-                _price,
-                _forSale,
-                _image
-            );
+        Book memory b =Book(lastId,_title,_isbn,_author,_category, owner, _price, _forSale,_image);
         books.push(b);
         sellerProducts[msg.sender].push(b);
         bookById[lastId] = b;
@@ -84,48 +65,24 @@ contract BookStore {
         bookById[_id].forSale = true;
     }
 
-    function buyBook(
-        uint256 _id,
-        string memory _name,
-        string memory _deliveryAddress,
-        uint256 _postalCode,
-        uint256 _phone
-    ) public payable {
+    function buyBook(uint256 _id, string memory _name, string memory _deliveryAddress, uint256 _postalCode, uint256 _phone) public payable {
         require(bookExists[_id], "The book must exist to be purchased");
         require(bytes(_name).length > 0, "The name must be set");
-        require(
-            bytes(_deliveryAddress).length > 0,
-            "The Delivery Address must be set"
-        );
+        require(bytes(_deliveryAddress).length > 0, "The Delivery Address must be set");
         require(_postalCode > 0, "The postal code must be set");
         require(_phone > 0, "The Phone Number must be set");
 
         Book memory b = bookById[_id]; //Need to retrieve the book by it's id.
         Order memory newOrder =
-            Order(
-                _id,
-                _name,
-                _deliveryAddress,
-                _postalCode,
-                _phone,
-                "pending",
-                msg.sender
-            );
-        require(
-            msg.value >= b.price,
-            "The payment must be equal to the book price"
-        );
-
+            Order(_id,_name,_deliveryAddress, _postalCode, _phone,"pending", msg.sender);
+        require(msg.value >= b.price,"The payment must be equal to the book price");
+ 
         pendingSellerOrders[b.owner].push(newOrder);
         pendingBuyerOrders[msg.sender].push(newOrder);
         orders.push(newOrder);
         orderById[_id] = newOrder;
-        lastPendingSellerOrder = pendingSellerOrders[b.owner].length > 0
-            ? pendingSellerOrders[b.owner].length - 1
-            : 0;
-        lastPendingBuyerOrder = pendingBuyerOrders[b.owner].length > 0
-            ? pendingBuyerOrders[b.owner].length - 1
-            : 0;
+        lastPendingSellerOrder = pendingSellerOrders[b.owner].length > 0 ? pendingSellerOrders[b.owner].length - 1: 0;
+        lastPendingBuyerOrder = pendingBuyerOrders[b.owner].length > 0 ? pendingBuyerOrders[b.owner].length - 1: 0;
         BookToken(token).transferFrom(b.owner, msg.sender, _id); // Transfer the book token to the new owner
         b.owner.transfer(b.price);
     }
@@ -133,10 +90,7 @@ contract BookStore {
     function markOrderCompleted(uint256 _id) public {
         Order memory order = orderById[_id];
         Book memory book = bookById[_id];
-        require(
-            book.owner == msg.sender,
-            "Only the seller can mark the order as completed"
-        );
+        require(book.owner == msg.sender,"Only the seller can mark the order as completed");
         order.state = "completed";
         address customer = order.customer;
         // Delete the seller order from the array of pending orders
@@ -164,11 +118,7 @@ contract BookStore {
         previousOwners[_id].push(msg.sender);
     }
 
-    function getBooksIds(uint256 _limit)
-        public
-        view
-        returns (uint256[] memory)
-    {
+    function getBooksIds(uint256 _limit)public view returns (uint256[] memory){
         uint256 length = books.length;
         uint256 counter = (_limit > length) ? length : _limit; // If you're requesting more books than available, return only the available
         uint256 condition = (_limit > length) ? 0 : (length - _limit);
@@ -181,9 +131,7 @@ contract BookStore {
         return ids;
     }
 
-    function getBook(uint256 _id)
-        public
-        view
+    function getBook(uint256 _id) public view
         returns (
             uint256 id,
             string memory title,
