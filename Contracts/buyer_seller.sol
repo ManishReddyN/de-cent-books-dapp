@@ -63,6 +63,30 @@ contract BookStore {
         token = _token;
     }
     
+    function addBook(string memory _title, string memory _isbn, string memory _author, string memory _category, uint256 _price, bool _forSale) public{
+        require(bytes(_title).length>0,'Book Name is necessary');
+        require(bytes(_isbn).length>0,'ISBN is necessary');
+        require(bytes(_author).length>0,'Author Name is necessary');
+        require(_price>0,'Price is necessary');
+        if(bytes(_forSale).length<=0) _forSale = false;
+
+        Book memory b = Book(lastId,_title,_isbn,_author,_category,_price,_forSale);
+        books.push(b);
+        sellerProducts[msg.sender].push(b);
+        bookById[lastId]=b;
+        bookExists[lastId]=true;
+        BookToken(token).mint(address(this),lastId); // New token for this book owned by the contract until sold.
+        lastId+=1;
+    }
+
+    function sellBook(uint256 _id) public{
+        require(_id>=0,'ID is necessary');
+        Book b = bookById[_id];
+        b.forSale=true;
+    }
+
+
+
     function buyBook(uint256 _id, string memory _name, string memory _deliveryAddress, uint256 _postalCode, uint256 _phone) public payable {
         require(bookExists[_id], 'The book must exist to be purchased');
         require(bytes(_name).length > 0, 'The name must be set');
