@@ -1,9 +1,8 @@
 pragma solidity ^0.5.0;
-import "./BookToken.sol";
 
 contract BookStore {
     struct Book {
-        uint256 id;
+        bytes32 id;
         string title;
         string isbn;
         string author;
@@ -14,7 +13,8 @@ contract BookStore {
         string image;
     }
     struct Order {
-        uint256 id;
+        bytes32 id;
+        bytes32 bookId;
         string name;
         string deliveryAddress;
         uint256 postalCode;
@@ -23,117 +23,156 @@ contract BookStore {
         address customer;
     }
 
-    mapping(address => Book[]) public sellerProducts; // Seller address => books ; The books added by the seller
-    mapping(address => Order[]) public pendingSellerOrders; // Seller address => orders ; The books waiting to be fulfilled by the seller, used by sellers to check which orders have to be fulfilled
-    mapping(address => Order[]) public pendingBuyerOrders; //Buyer address => orders ;The books that the buyer purchased waiting to be sent
-    mapping(address => Order[]) public completedSellerOrders; // Seller address => orders  A history of past orders fulfilled by the seller
-    mapping(address => Order[]) public completedBuyerOrders; // Buyer address => orders A history of past orders made by this buyer
-    mapping(uint256 => Book) public bookById; // Book id => book
-    mapping(uint256 => address[]) public previousOwners; // Book id => previousOwners
-    mapping(uint256 => Order) public orderById; // book id => order
-    mapping(uint256 => bool) public bookExists; // Book id => true or false
-    Book[] public books;
-    Order[] public orders;
+    mapping(address => mapping(bytes32 => bytes32)) public ownerProducts; // Seller address => books ; The books added by the seller
+    mapping(address => mapping(bytes32 => bytes32)) public pendingSellerOrders; // Seller address => orders ; The books waiting to be fulfilled by the seller, used by sellers to check which orders have to be fulfilled
+    mapping(address => mapping(bytes32 => bytes32)) public pendingBuyerOrders; //Buyer address => orders ;The books that the buyer purchased waiting to be sent
+    mapping(address => mapping(bytes32 => bytes32))
+        public completedSellerOrders; // Seller address => orders  A history of past orders fulfilled by the seller
+    mapping(address => mapping(bytes32 => bytes32)) public completedBuyerOrders; // Buyer address => orders A history of past orders made by this buyer
+    mapping(address => bytes32[]) public userOrders;
+    mapping(bytes32 => Book) public bookById; // Book id => book
+
+    mapping(bytes32 => address[]) public previousOwners; // Book id => previousOwners
+    mapping(bytes32 => Order) public orderById; // book id => order
+    mapping(bytes32 => bool) public bookExists; // Book id => true or false
+    bytes32[] public books;
+    bytes32[] public orders;
+    mapping(bytes32 => bytes32) public booksForSale;
     uint256 public lastId;
     address public token;
     uint256 public lastPendingSellerOrder;
     uint256 public lastPendingBuyerOrder;
 
-    constructor(address _token) public {
-        token = _token;
-    }
-
-    function addBook(string memory _title, string memory _isbn, string memory _author, string memory _category, uint256 _price, bool _forSale, string memory _image) public {
+    function addBook(
+        string memory _title,
+        string memory _isbn,
+        string memory _author,
+        string memory _category,
+        uint256 _price,
+        bool _forSale,
+        string memory _image
+    ) public {
         require(bytes(_title).length > 0, "Book Name is necessary");
         require(bytes(_isbn).length > 0, "ISBN is necessary");
         require(bytes(_author).length > 0, "Author Name is necessary");
         require(_price > 0, "Price is necessary");
         if (!(_forSale)) _forSale = false;
         address payable owner = msg.sender;
-
-        Book memory b =Book(lastId,_title,_isbn,_author,_category, owner, _price, _forSale,_image);
-        books.push(b);
-        sellerProducts[msg.sender].push(b);
-        bookById[lastId] = b;
-        bookExists[lastId] = true;
-        BookToken(token).mint(address(this), lastId); // New token for this book owned by the contract until sold.
-        lastId += 1;
+        bytes32 id = sha256(abi.encodePacked(_title, _isbn, _author, owner));
+        require(bookExists[id] == false, "Book already exists");
+        Book memory b =
+            Book(
+                id,
+                _title,
+                _isbn,
+                _author,
+                _category,
+                owner,
+                _price,
+                _forSale,
+                _image
+            );
+        books.push(id);
+        ownerProducts[msg.sender][id] = id;
+        bookById[id] = b;
+        bookExists[id] = true;
     }
 
-    function sellBook(uint256 _id) public {
-        require(_id >= 0, "ID is necessary");
+    function sellBook(bytes32 _id) public {
+        require(bookExists[_id] == true, "Book doesn't exist");
         bookById[_id].forSale = true;
+        booksForSale[_id] = _id;
     }
 
-    function buyBook(uint256 _id, string memory _name, string memory _deliveryAddress, uint256 _postalCode, uint256 _phone) public payable {
+    function buyBook(
+        bytes32 _id,
+        string memory _name,
+        string memory _deliveryAddress,
+        uint256 _postalCode,
+        uint256 _phone
+    ) public payable {
         require(bookExists[_id], "The book must exist to be purchased");
         require(bytes(_name).length > 0, "The name must be set");
-        require(bytes(_deliveryAddress).length > 0, "The Delivery Address must be set");
+        require(
+            bytes(_deliveryAddress).length > 0,
+            "The Delivery Address must be set"
+        );
         require(_postalCode > 0, "The postal code must be set");
         require(_phone > 0, "The Phone Number must be set");
-
+        address payable customer = msg.sender;
+        bytes32 id =
+            sha256(abi.encodePacked(_name, _id, _deliveryAddress, customer)); // using name, book id , delivery address and customer address to make order id
         Book memory b = bookById[_id]; //Need to retrieve the book by it's id.
         Order memory newOrder =
-            Order(_id,_name,_deliveryAddress, _postalCode, _phone,"pending", msg.sender);
-        require(msg.value >= b.price,"The payment must be equal to the book price");
- 
-        pendingSellerOrders[b.owner].push(newOrder);
-        pendingBuyerOrders[msg.sender].push(newOrder);
-        orders.push(newOrder);
-        orderById[_id] = newOrder;
-        lastPendingSellerOrder = pendingSellerOrders[b.owner].length > 0 ? pendingSellerOrders[b.owner].length - 1: 0;
-        lastPendingBuyerOrder = pendingBuyerOrders[b.owner].length > 0 ? pendingBuyerOrders[b.owner].length - 1: 0;
-        BookToken(token).transferFrom(b.owner, msg.sender, _id); // Transfer the book token to the new owner
+            Order(
+                id,
+                _id,
+                _name,
+                _deliveryAddress,
+                _postalCode,
+                _phone,
+                "pending",
+                msg.sender
+            );
+        require(
+            msg.value == b.price,
+            "The payment must be equal to the book price"
+        );
+
+        pendingSellerOrders[b.owner][id] = id;
+        pendingBuyerOrders[customer][id] = id;
+        userOrders[b.owner].push(id);
+        userOrders[customer].push(id);
+        orders.push(id);
+        orderById[id] = newOrder;
+        delete (booksForSale[id]);
         b.owner.transfer(b.price);
     }
 
-    function markOrderCompleted(uint256 _id) public {
+    function markOrderCompleted(bytes32 _id) public {
         Order memory order = orderById[_id];
-        Book memory book = bookById[_id];
-        require(book.owner == msg.sender,"Only the seller can mark the order as completed");
+        Book memory book = bookById[order.bookId];
+        require(
+            book.owner == msg.sender,
+            "Only the seller can mark the order as completed"
+        );
         order.state = "completed";
         address customer = order.customer;
-        // Delete the seller order from the array of pending orders
-        for (uint256 i = 0; i < pendingSellerOrders[book.owner].length; i++) {
-            if (pendingSellerOrders[book.owner][i].id == _id) {
-                Order memory lastElement = orderById[lastPendingSellerOrder];
-                pendingSellerOrders[book.owner][i] = lastElement;
-                pendingSellerOrders[book.owner].length--;
-                lastPendingSellerOrder--;
-            }
-        }
-        // Delete the seller order from the array of pending orders
-        for (uint256 i = 0; i < pendingBuyerOrders[msg.sender].length; i++) {
-            if (pendingBuyerOrders[msg.sender][i].id == order.id) {
-                Order memory lastElement = orderById[lastPendingBuyerOrder];
-                pendingBuyerOrders[msg.sender][i] = lastElement;
-                pendingBuyerOrders[msg.sender].length--;
-                lastPendingBuyerOrder--;
-            }
-        }
-        completedSellerOrders[book.owner].push(order);
-        completedBuyerOrders[msg.sender].push(order);
-        orderById[_id] = order;
+        bytes32 pendingSellerOrderId = pendingSellerOrders[msg.sender][_id];
+        bytes32 pendingBuyerOrderId = pendingBuyerOrders[customer][_id];
+        completedSellerOrders[msg.sender][_id] = pendingSellerOrderId;
+        completedBuyerOrders[customer][_id] = pendingBuyerOrderId;
+        delete (pendingSellerOrders[msg.sender][_id]);
+        delete (pendingBuyerOrders[customer][_id]);
         book.owner = address(uint160(customer));
-        previousOwners[_id].push(msg.sender);
+        previousOwners[book.id].push(msg.sender);
+        bytes32 bookId = ownerProducts[msg.sender][book.id];
+        ownerProducts[customer][bookId] = bookId;
     }
 
-    function getBooksIds(uint256 _limit)public view returns (uint256[] memory){
-        uint256 length = books.length;
-        uint256 counter = (_limit > length) ? length : _limit; // If you're requesting more books than available, return only the available
-        uint256 condition = (_limit > length) ? 0 : (length - _limit);
-        uint256[] memory ids = new uint256[](_limit > length ? _limit : length);
-        uint256 increment = 0;
-        // Loop backwards to get the most recent products first
-        for (int256 i = int256(counter); i >= int256(condition); i--) {
-            ids[increment] = books[uint256(i)].id;
+    function getBooksIds(int256 _limit) public view returns (bytes32[] memory) {
+        int256 length = int256(books.length);
+        int256 start = length - 1;
+        int256 end = 0;
+        if (_limit > length) {
+            end = 0;
+        } else {
+            end = length - _limit;
+        }
+        bytes32[] memory ids = new bytes32[](uint256(start - end + 1));
+        uint256 inc = 0;
+        for (int256 i = end; i <= start; i++) {
+            ids[inc] = (books[uint256(i)]);
+            inc += 1;
         }
         return ids;
     }
 
-    function getBook(uint256 _id) public view
+    function getBook(bytes32 _id)
+        public
+        view
         returns (
-            uint256 id,
+            bytes32 id,
             string memory title,
             string memory isbn,
             string memory author,
@@ -156,68 +195,98 @@ contract BookStore {
         image = b.image;
     }
 
-    function getBookIds(string memory _type, uint256 _limit)
+    function getOrders(string memory _type)
         public
         view
-        returns (uint256[] memory)
+        returns (bytes32[] memory)
     {
-        uint256 length;
-        uint256 counter;
-        uint256 condition;
-        uint256[] memory ids;
-        uint256 increment = 0;
+        int256 length;
         address _owner = msg.sender;
 
         if (compareStrings(_type, "pending-seller")) {
-            length = pendingSellerOrders[_owner].length;
-            counter = (_limit > length) ? length : _limit;
-            condition = (_limit > length) ? 0 : (length - _limit);
-            ids = new uint256[](_limit > length ? _limit : length);
-            for (int256 i = int256(counter); i >= int256(condition); i--) {
-                ids[increment] = uint256(
-                    pendingSellerOrders[_owner][uint256(i)].id
-                );
+            length = int256(userOrders[_owner].length);
+            int256 start = length - 1;
+            int256 end = 0;
+            bytes32[] memory ids = new bytes32[](uint256(start - end + 1));
+            for (int256 i = 0; i < length; i++) {
+                bytes32 id =
+                    pendingSellerOrders[_owner][userOrders[_owner][uint256(i)]];
+                uint256 inc = 0;
+                if (
+                    id !=
+                    0x0000000000000000000000000000000000000000000000000000000000000000
+                ) {
+                    ids[inc] = id;
+                    inc += 1;
+                }
             }
+            return ids;
         } else if (compareStrings(_type, "pending-buyer")) {
-            length = pendingBuyerOrders[_owner].length;
-            counter = (_limit > length) ? length : _limit;
-            condition = (_limit > length) ? 0 : (length - _limit);
-            ids = new uint256[](_limit > length ? _limit : length);
-            for (int256 i = int256(counter); i >= int256(condition); i--) {
-                ids[increment] = uint256(
-                    pendingBuyerOrders[_owner][uint256(i)].id
-                );
+            length = int256(userOrders[_owner].length);
+            int256 start = length - 1;
+            int256 end = 0;
+            bytes32[] memory ids = new bytes32[](uint256(start - end + 1));
+            for (int256 i = 0; i < length; i++) {
+                bytes32 id =
+                    pendingBuyerOrders[_owner][userOrders[_owner][uint256(i)]];
+                uint256 inc = 0;
+                if (
+                    id !=
+                    0x0000000000000000000000000000000000000000000000000000000000000000
+                ) {
+                    ids[inc] = id;
+                    inc += 1;
+                }
             }
+            return ids;
         } else if (compareStrings(_type, "completed-seller")) {
-            length = completedSellerOrders[_owner].length;
-            counter = (_limit > length) ? length : _limit;
-            condition = (_limit > length) ? 0 : (length - _limit);
-            ids = new uint256[](_limit > length ? _limit : length);
-            for (int256 i = int256(counter); i >= int256(condition); i--) {
-                ids[increment] = uint256(
-                    completedSellerOrders[_owner][uint256(i)].id
-                );
+            length = int256(userOrders[_owner].length);
+            int256 start = length - 1;
+            int256 end = 0;
+            bytes32[] memory ids = new bytes32[](uint256(start - end + 1));
+            for (int256 i = 0; i < length; i++) {
+                bytes32 id =
+                    completedSellerOrders[_owner][
+                        userOrders[_owner][uint256(i)]
+                    ];
+                uint256 inc = 0;
+                if (
+                    id !=
+                    0x0000000000000000000000000000000000000000000000000000000000000000
+                ) {
+                    ids[inc] = id;
+                    inc += 1;
+                }
             }
+            return ids;
         } else if (compareStrings(_type, "completed-buyer")) {
-            length = completedBuyerOrders[_owner].length;
-            counter = (_limit > length) ? length : _limit;
-            condition = (_limit > length) ? 0 : (length - _limit);
-            ids = new uint256[](_limit > length ? _limit : length);
-            for (int256 i = int256(counter); i >= int256(condition); i--) {
-                ids[increment] = uint256(
-                    completedBuyerOrders[_owner][uint256(i)].id
-                );
+            length = int256(userOrders[_owner].length);
+            int256 start = length - 1;
+            int256 end = 0;
+            bytes32[] memory ids = new bytes32[](uint256(start - end + 1));
+            for (int256 i = 0; i < length; i++) {
+                bytes32 id =
+                    completedBuyerOrders[_owner][
+                        userOrders[_owner][uint256(i)]
+                    ];
+                uint256 inc = 0;
+                if (
+                    id !=
+                    0x0000000000000000000000000000000000000000000000000000000000000000
+                ) {
+                    ids[inc] = id;
+                    inc += 1;
+                }
             }
+            return ids;
         }
-
-        return ids;
     }
 
-    function getOrder(string memory _type, uint256 _id)
+    function getOrderById(bytes32 id)
         public
         view
         returns (
-            uint256 id,
+            bytes32 orderId,
             string memory name,
             string memory deliveryAddress,
             uint256 postalCode,
@@ -227,18 +296,8 @@ contract BookStore {
         )
     {
         Order memory o;
-        address _owner = msg.sender;
-        if (compareStrings(_type, "pending-seller")) {
-            o = pendingSellerOrders[_owner][_id];
-        } else if (compareStrings(_type, "pending-buyer")) {
-            o = pendingBuyerOrders[_owner][_id];
-        } else if (compareStrings(_type, "completed-seller")) {
-            o = completedSellerOrders[_owner][_id];
-        } else if (compareStrings(_type, "completed-buyer")) {
-            o = completedBuyerOrders[_owner][_id];
-        }
-
-        id = o.id;
+        o = orderById[id];
+        orderId = o.id;
         name = o.name;
         deliveryAddress = o.deliveryAddress;
         postalCode = o.postalCode;
