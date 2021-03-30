@@ -72,18 +72,18 @@ contract BookStore {
         require(_postalCode > 0, "The postal code must be set");
         require(_phone > 0, "The Phone Number must be set");
 
-        Book memory b = bookById[_id]; //Need to retrieve the book by it's id.
-        Order memory newOrder =
-            Order(_id,_name,_deliveryAddress, _postalCode, _phone,"pending", msg.sender);
+        Book memory b = bookById[_id];
+        //Need to retrieve the book by it's id.
+        Order memory newOrder =Order(_id,_name,_deliveryAddress, _postalCode, _phone,"pending", msg.sender);
         require(msg.value >= b.price,"The payment must be equal to the book price");
- 
+        //if(msg.value > b.price) msg.sender.transfer(msg.value - b.price);
         pendingSellerOrders[b.owner].push(newOrder);
         pendingBuyerOrders[msg.sender].push(newOrder);
         orders.push(newOrder);
         orderById[_id] = newOrder;
         lastPendingSellerOrder = pendingSellerOrders[b.owner].length > 0 ? pendingSellerOrders[b.owner].length - 1: 0;
         lastPendingBuyerOrder = pendingBuyerOrders[b.owner].length > 0 ? pendingBuyerOrders[b.owner].length - 1: 0;
-        BookToken(token).transferFrom(b.owner, msg.sender, _id); // Transfer the book token to the new owner
+        //BookToken(token).transferFrom(b.owner, msg.sender, _id); // Transfer the book token to the new owner
         b.owner.transfer(b.price);
     }
 
