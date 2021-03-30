@@ -159,11 +159,21 @@ contract BookStore {
         } else {
             end = length - _limit;
         }
-        bytes32[] memory ids = new bytes32[](uint256(start - end + 1));
+        uint256 size = length > _limit ? uint256(_limit) : uint256(length);
+        bytes32[] memory ids = new bytes32[](size);
         uint256 inc = 0;
         for (int256 i = end; i <= start; i++) {
-            ids[inc] = (books[uint256(i)]);
-            inc += 1;
+            bytes32 bookId = books[uint256(i)];
+            if (
+                bookId !=
+                0x0000000000000000000000000000000000000000000000000000000000000000
+            ) {
+                ids[inc] = bookId;
+                inc += 1;
+            }
+            if (inc > uint256(_limit)) {
+                break;
+            }
         }
         return ids;
     }
@@ -193,6 +203,31 @@ contract BookStore {
         price = b.price;
         forSale = b.forSale;
         image = b.image;
+    }
+
+    function getBooksForSale(uint256 _limit)
+        public
+        view
+        returns (bytes32[] memory)
+    {
+        int256 length;
+        length = int256(books.length);
+        bytes32[] memory ids = new bytes32[](_limit);
+        for (int256 i = 0; i < length; i++) {
+            bytes32 id = booksForSale[books[uint256(i)]];
+            uint256 inc = 0;
+            if (
+                id !=
+                0x0000000000000000000000000000000000000000000000000000000000000000
+            ) {
+                ids[inc] = id;
+                inc += 1;
+                if (inc > _limit) {
+                    break;
+                }
+            }
+        }
+        return ids;
     }
 
     function getOrders(string memory _type)
