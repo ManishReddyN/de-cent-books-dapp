@@ -1,9 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
-import App from "./App";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { MetaMaskProvider } from "metamask-react";
+import Routes from "./Routes";
 const config = {
   useSystemColorMode: false,
   initialColorMode: "dark",
@@ -14,7 +14,7 @@ ReactDOM.render(
   <React.StrictMode>
     <MetaMaskProvider>
       <ChakraProvider theme={customTheme}>
-        <App />
+        <Routes />
       </ChakraProvider>
     </MetaMaskProvider>
   </React.StrictMode>,
