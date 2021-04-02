@@ -56,7 +56,7 @@ contract BookStore {
         sellerProducts[msg.sender].push(b);
         bookById[lastId] = b;
         bookExists[lastId] = true;
-        BookToken(token).mint(address(this), lastId); // New token for this book owned by the contract until sold.
+        //BookToken(token).mint(address(this), lastId); // New token for this book owned by the contract until sold. Token is not working properly. Commenting it out.
         lastId += 1;
     }
 
@@ -83,7 +83,7 @@ contract BookStore {
         orderById[_id] = newOrder;
         lastPendingSellerOrder = pendingSellerOrders[b.owner].length > 0 ? pendingSellerOrders[b.owner].length - 1: 0;
         lastPendingBuyerOrder = pendingBuyerOrders[b.owner].length > 0 ? pendingBuyerOrders[b.owner].length - 1: 0;
-        //BookToken(token).transferFrom(b.owner, msg.sender, _id); // Transfer the book token to the new owner
+        //BookToken(token).transferFrom(b.owner, msg.sender, _id); // Transfer the book token to the new owner. Stop using this for now.
         b.owner.transfer(b.price);
     }
 
