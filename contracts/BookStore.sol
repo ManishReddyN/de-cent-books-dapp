@@ -11,6 +11,7 @@ contract BookStore {
         uint256 price;
         bool forSale;
         string image;
+        bool sold;
     }
     struct Order {
         bytes32 id;
@@ -20,7 +21,9 @@ contract BookStore {
         uint256 postalCode;
         uint256 phone;
         string state; // Either 'pending', 'completed'
+        string bookName;
         address customer;
+        address seller;
     }
 
     mapping(address => mapping(bytes32 => bytes32)) public ownerProducts; // Seller address => books ; The books added by the seller
@@ -70,7 +73,8 @@ contract BookStore {
                 owner,
                 _price,
                 _forSale,
-                _image
+                _image,
+                false
             );
         books.push(id);
         ownerProducts[msg.sender][id] = id;
@@ -81,6 +85,12 @@ contract BookStore {
     function sellBook(bytes32 _id) public {
         require(bookExists[_id] == true, "Book doesn't exist");
         bookById[_id].forSale = true;
+        booksForSale[_id] = _id;
+    }
+
+    function unSellBook(bytes32 _id) public {
+        require(bookExists[_id] == true, "Book doesn't exist");
+        bookById[_id].forSale = false;
         booksForSale[_id] = _id;
     }
 
@@ -103,6 +113,7 @@ contract BookStore {
         bytes32 id =
             sha256(abi.encodePacked(_name, _id, _deliveryAddress, customer)); // using name, book id , delivery address and customer address to make order id
         Book memory b = bookById[_id]; //Need to retrieve the book by it's id.
+        string memory bookName = b.title;
         Order memory newOrder =
             Order(
                 id,
@@ -112,7 +123,9 @@ contract BookStore {
                 _postalCode,
                 _phone,
                 "pending",
-                msg.sender
+                bookName,
+                msg.sender,
+                b.owner
             );
         require(
             msg.value == b.price,
@@ -126,6 +139,8 @@ contract BookStore {
         orders.push(id);
         orderById[id] = newOrder;
         delete (booksForSale[id]);
+        bookById[_id].forSale = false;
+        bookById[_id].sold = true;
         b.owner.transfer(b.price);
     }
 
@@ -136,17 +151,13 @@ contract BookStore {
             book.owner == msg.sender,
             "Only the seller can mark the order as completed"
         );
-        order.state = "completed";
+        orderById[_id].state = "completed";
         address customer = order.customer;
-        bytes32 pendingSellerOrderId = pendingSellerOrders[msg.sender][_id];
-        bytes32 pendingBuyerOrderId = pendingBuyerOrders[customer][_id];
-        completedSellerOrders[msg.sender][_id] = pendingSellerOrderId;
-        completedBuyerOrders[customer][_id] = pendingBuyerOrderId;
-        delete (pendingSellerOrders[msg.sender][_id]);
-        delete (pendingBuyerOrders[customer][_id]);
-        book.owner = address(uint160(customer));
+        bookById[order.bookId].owner = address(uint160(customer));
         previousOwners[book.id].push(msg.sender);
         bytes32 bookId = ownerProducts[msg.sender][book.id];
+        bookById[book.id].forSale = false;
+        bookById[book.id].sold = false;
         ownerProducts[customer][bookId] = bookId;
     }
 
@@ -159,7 +170,7 @@ contract BookStore {
         } else {
             end = length - _limit;
         }
-        uint256 size = length > _limit ? uint256(_limit) : uint256(length);
+        uint256 size = (length) > _limit ? uint256(_limit) : uint256(length);
         bytes32[] memory ids = new bytes32[](size);
         uint256 inc = 0;
         for (int256 i = end; i <= start; i++) {
@@ -210,18 +221,18 @@ contract BookStore {
         view
         returns (bytes32[] memory)
     {
-        int256 length;
-        length = int256(books.length);
+        uint256 length;
+        length = uint256(books.length);
         bytes32[] memory ids = new bytes32[](_limit);
-        for (int256 i = 0; i < length; i++) {
-            bytes32 id = booksForSale[books[uint256(i)]];
-            uint256 inc = 0;
+        uint256 inc = 0;
+        for (uint256 i = 0; i < length; i++) {
+            bytes32 id = booksForSale[books[i]];
             if (
                 id !=
                 0x0000000000000000000000000000000000000000000000000000000000000000
             ) {
                 ids[inc] = id;
-                inc += 1;
+                inc++;
                 if (inc > _limit) {
                     break;
                 }
@@ -230,91 +241,8 @@ contract BookStore {
         return ids;
     }
 
-    function getOrders(string memory _type)
-        public
-        view
-        returns (bytes32[] memory)
-    {
-        int256 length;
-        address _owner = msg.sender;
-
-        if (compareStrings(_type, "pending-seller")) {
-            length = int256(userOrders[_owner].length);
-            int256 start = length - 1;
-            int256 end = 0;
-            bytes32[] memory ids = new bytes32[](uint256(start - end + 1));
-            for (int256 i = 0; i < length; i++) {
-                bytes32 id =
-                    pendingSellerOrders[_owner][userOrders[_owner][uint256(i)]];
-                uint256 inc = 0;
-                if (
-                    id !=
-                    0x0000000000000000000000000000000000000000000000000000000000000000
-                ) {
-                    ids[inc] = id;
-                    inc += 1;
-                }
-            }
-            return ids;
-        } else if (compareStrings(_type, "pending-buyer")) {
-            length = int256(userOrders[_owner].length);
-            int256 start = length - 1;
-            int256 end = 0;
-            bytes32[] memory ids = new bytes32[](uint256(start - end + 1));
-            for (int256 i = 0; i < length; i++) {
-                bytes32 id =
-                    pendingBuyerOrders[_owner][userOrders[_owner][uint256(i)]];
-                uint256 inc = 0;
-                if (
-                    id !=
-                    0x0000000000000000000000000000000000000000000000000000000000000000
-                ) {
-                    ids[inc] = id;
-                    inc += 1;
-                }
-            }
-            return ids;
-        } else if (compareStrings(_type, "completed-seller")) {
-            length = int256(userOrders[_owner].length);
-            int256 start = length - 1;
-            int256 end = 0;
-            bytes32[] memory ids = new bytes32[](uint256(start - end + 1));
-            for (int256 i = 0; i < length; i++) {
-                bytes32 id =
-                    completedSellerOrders[_owner][
-                        userOrders[_owner][uint256(i)]
-                    ];
-                uint256 inc = 0;
-                if (
-                    id !=
-                    0x0000000000000000000000000000000000000000000000000000000000000000
-                ) {
-                    ids[inc] = id;
-                    inc += 1;
-                }
-            }
-            return ids;
-        } else if (compareStrings(_type, "completed-buyer")) {
-            length = int256(userOrders[_owner].length);
-            int256 start = length - 1;
-            int256 end = 0;
-            bytes32[] memory ids = new bytes32[](uint256(start - end + 1));
-            for (int256 i = 0; i < length; i++) {
-                bytes32 id =
-                    completedBuyerOrders[_owner][
-                        userOrders[_owner][uint256(i)]
-                    ];
-                uint256 inc = 0;
-                if (
-                    id !=
-                    0x0000000000000000000000000000000000000000000000000000000000000000
-                ) {
-                    ids[inc] = id;
-                    inc += 1;
-                }
-            }
-            return ids;
-        }
+    function getOrdersLists() public view returns (bytes32[] memory) {
+        return orders;
     }
 
     function getOrderById(bytes32 id)
@@ -327,7 +255,9 @@ contract BookStore {
             uint256 postalCode,
             uint256 phone,
             string memory state,
-            address customer
+            address customer,
+            string memory bookName,
+            address seller
         )
     {
         Order memory o;
@@ -339,6 +269,8 @@ contract BookStore {
         phone = o.phone;
         state = o.state;
         customer = o.customer;
+        bookName = o.bookName;
+        seller = o.seller;
     }
 
     function compareStrings(string memory a, string memory b)
