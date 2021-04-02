@@ -1,9 +1,12 @@
+import { Alert } from "@chakra-ui/alert";
 import { Button } from "@chakra-ui/button";
 import { Box, SimpleGrid } from "@chakra-ui/layout";
 import { useToast } from "@chakra-ui/toast";
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import Web3 from "web3";
 import { Book_Store_ABI, Book_Store_Address } from "../config";
+import Base from "./base";
 import BookCard from "./bookCard";
 
 export default function ViewBooksForSale() {
@@ -62,30 +65,40 @@ export default function ViewBooksForSale() {
   }, [booksLoaded]);
 
   return (
-    <div>
-      <SimpleGrid minChildWidth="320px" spacing="24px">
-        {booksForSale.map((book) => {
-          if (
-            book.owner !== account &&
-            book.id !==
-              "0x0000000000000000000000000000000000000000000000000000000000000000"
-          ) {
-            return (
-              <Box textAlign="center">
-                <BookCard
-                  title={book.title}
-                  image={book.image}
-                  author={book.author}
-                  isbn={book.isbn}
-                  price={book.price}
-                  category={book.category}
-                ></BookCard>
-                {book.forSale && <Button mt="20px">Buy This Book</Button>}
-              </Box>
-            );
-          }
-        })}
-      </SimpleGrid>
-    </div>
+    <Base>
+      {booksForSale === undefined && (
+        <Alert colorScheme="red">No Books For Sale At The Moment.</Alert>
+      )}
+      <div>
+        <SimpleGrid minChildWidth="320px" spacing="24px">
+          {booksForSale.map((book) => {
+            if (
+              book.owner !== account &&
+              book.id !==
+                "0x0000000000000000000000000000000000000000000000000000000000000000" &&
+              book.forSale
+            ) {
+              return (
+                <Box textAlign="center">
+                  <BookCard
+                    title={book.title}
+                    image={book.image}
+                    author={book.author}
+                    isbn={book.isbn}
+                    price={book.price / 1000000000}
+                    category={book.category}
+                  ></BookCard>
+                  <Link to={`/buyBook?id=${book.id}&price=${book.price}`}>
+                    <Button width="320px" colorScheme="blue" roundedTop={0}>
+                      Buy This Book
+                    </Button>
+                  </Link>
+                </Box>
+              );
+            }
+          })}
+        </SimpleGrid>
+      </div>
+    </Base>
   );
 }

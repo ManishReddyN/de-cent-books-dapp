@@ -1,16 +1,12 @@
 import {
   Box,
   Center,
-  useColorModeValue,
   Heading,
   Text,
   Stack,
   Image,
   Tag,
-  Button,
 } from "@chakra-ui/react";
-import Web3 from "web3";
-import { Book_Store_ABI, Book_Store_Address } from "../config";
 
 const BookCard = ({
   title = "title",
@@ -26,12 +22,13 @@ const BookCard = ({
     <Center pt={12} pb={0}>
       <Box
         role={"group"}
-        p={6}
+        px={6}
+        pt={6}
         maxW={"320px"}
         w={"full"}
         bg={"blackAlpha.400"}
         boxShadow={"xl"}
-        rounded={"lg"}
+        roundedTop={"lg"}
         pos={"relative"}
         zIndex={1}
         textAlign="center"

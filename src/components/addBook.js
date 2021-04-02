@@ -1,5 +1,5 @@
 import React from "react";
-import { Heading } from "@chakra-ui/layout";
+import { Center, Heading } from "@chakra-ui/layout";
 import { useEffect, useState } from "react";
 import { Book_Store_ABI, Book_Store_Address } from "../config";
 import FileInputComponent from "react-file-input-previews-base64";
@@ -11,9 +11,10 @@ import { Container } from "@chakra-ui/layout";
 import { Button } from "@chakra-ui/button";
 import { AttachmentIcon } from "@chakra-ui/icons";
 import { Text } from "@chakra-ui/layout";
-import { useToast } from "@chakra-ui/react";
+import { Select, useToast } from "@chakra-ui/react";
 import Web3 from "web3";
-import { Redirect } from "react-router";
+import { Redirect, useHistory } from "react-router";
+import Base from "./base";
 const imgbbUploader = require("imgbbjs");
 
 function AddBook() {
@@ -66,9 +67,28 @@ function AddBook() {
     setMessage("");
     setLoading(true);
     console.log(title);
+    if (
+      title === "" ||
+      isbn === "" ||
+      author === "" ||
+      category === "" ||
+      price === 0 ||
+      img_url === ""
+    ) {
+      setError(true);
+      setLoading(false);
+    }
     try {
       await bookStore.methods
-        .addBook(title, isbn, author, category, price, false, img_url)
+        .addBook(
+          title,
+          isbn,
+          author,
+          category,
+          price * 1000000000,
+          false,
+          img_url
+        )
         .send({ from: account })
         .once("receipt", (receipt) => {
           console.log(receipt);
@@ -80,16 +100,25 @@ function AddBook() {
       setError(false);
       console.log(err);
     }
-    console.log("Hello");
+    setValues({
+      ...values,
+      title: "",
+      isbn: "",
+      author: "",
+      category: "",
+      price: 0,
+      forSale: false,
+      img_url: "",
+    });
   };
-
+  const history = useHistory();
   const errorMessage = () => {
     toast.closeAll();
     toast({
       position: "top",
       title: "Error",
       description:
-        "Please fill all the fields and check if the book already exists",
+        "Please fill all the fields, also check if the book already exists",
       isClosable: true,
       status: "error",
     });
@@ -103,80 +132,112 @@ function AddBook() {
       description: "Transaction Successful Through Metamask",
       status: "success",
     });
+    history.push("/myBooks");
   };
 
   const createBookForm = () => {
     return (
-      <div>
-        <Box textAlign="center" padding="30px" color="white">
-          <Heading size="md">Add Book</Heading>
-          <Container maxW="2xl">
-            <FormControl isRequired marginTop="20px">
-              <FormLabel>Cover of the Book</FormLabel>
-              <FileInputComponent
-                labelText=""
-                labelStyle={{ fontSize: 14 }}
-                multiple={false}
-                buttonComponent={
-                  <button type="button">
-                    <Box
-                      maxW="sm"
-                      border="1px"
-                      padding="10px"
-                      borderRadius="20px"
-                    >
-                      <Text>Upload the book cover</Text>
-                      <AttachmentIcon w={12} h={12} />
-                    </Box>
-                  </button>
-                }
-                callbackFunction={(file_arr) => {
-                  console.log(file_arr);
-                  imgbb
-                    .upload(file_arr.base64.split(",")[1])
-                    .then((res) => {
-                      console.log(res.data.image.url);
-                      setValues({ ...values, img_url: res.data.image.url });
-                    })
-                    .catch((err) => {
-                      console.log(err);
-                    });
-                }}
-                imagePreview={true}
-                accept="image/*"
-              />
-            </FormControl>
-            <FormControl id="title" isRequired marginTop="20px">
-              <FormLabel>Name of the Book</FormLabel>
-              <Input type="string" onChange={handleChange("title")} />
-            </FormControl>
-            <FormControl id="name" isRequired marginTop="20px">
-              <FormLabel>Author of the Book</FormLabel>
-              <Input type="string" onChange={handleChange("author")} />
-            </FormControl>
-            <FormControl id="name" isRequired marginTop="20px">
-              <FormLabel>ISBN Number of the Book</FormLabel>
-              <Input type="string" onChange={handleChange("isbn")} />
-            </FormControl>
-            <FormControl id="name" isRequired marginTop="20px">
-              <FormLabel>Genre</FormLabel>
-              <Input type="string" onChange={handleChange("category")} />
-            </FormControl>
-            <FormControl id="name" isRequired marginTop="20px">
-              <FormLabel>Price of the Book (In WEI)</FormLabel>
-              <Input type="number" onChange={handleChange("price")} />
-            </FormControl>
-            <Button
-              isLoading={loading}
-              colorScheme="blue"
-              marginTop="20px"
-              onClick={submit}
-            >
-              Submit
-            </Button>
-          </Container>
-        </Box>
-      </div>
+      <Base>
+        <div>
+          <Box textAlign="center" padding="30px" color="white">
+            <Heading size="md">Add Book</Heading>
+            <Container maxW="2xl">
+              <FormControl isRequired marginTop="20px">
+                <FormLabel>Cover of the Book</FormLabel>
+                <Center>
+                  <FileInputComponent
+                    labelText=""
+                    labelStyle={{ fontSize: 14 }}
+                    multiple={false}
+                    buttonComponent={
+                      <button type="button">
+                        <Box
+                          maxW="sm"
+                          border="1px"
+                          padding="10px"
+                          borderRadius="20px"
+                        >
+                          <Text>Upload the book cover</Text>
+                          <AttachmentIcon w={10} h={10} />
+                        </Box>
+                      </button>
+                    }
+                    callbackFunction={(file_arr) => {
+                      imgbb
+                        .upload(file_arr.base64.split(",")[1])
+                        .then((res) => {
+                          setValues({ ...values, img_url: res.data.image.url });
+                        })
+                        .catch((err) => {
+                          console.log(err);
+                        });
+                    }}
+                    imagePreview={true}
+                    accept="image/*"
+                  />
+                </Center>
+              </FormControl>
+
+              <FormControl id="title" isRequired marginTop="20px">
+                <FormLabel>Name of the Book</FormLabel>
+                <Input
+                  variant="filled"
+                  type="string"
+                  onChange={handleChange("title")}
+                />
+              </FormControl>
+              <FormControl id="name" isRequired marginTop="20px">
+                <FormLabel>Author of the Book</FormLabel>
+                <Input
+                  variant="filled"
+                  type="string"
+                  onChange={handleChange("author")}
+                />
+              </FormControl>
+              <FormControl id="name" isRequired marginTop="20px">
+                <FormLabel>ISBN Number of the Book</FormLabel>
+                <Input
+                  variant="filled"
+                  type="string"
+                  onChange={handleChange("isbn")}
+                />
+              </FormControl>
+              <FormControl id="name" isRequired marginTop="20px">
+                <FormLabel>Genre</FormLabel>
+                <Select
+                  placeholder="Select Genre"
+                  onChange={handleChange("category")}
+                  variant="filled"
+                >
+                  <option value="Science & Technology">
+                    Science & Technology
+                  </option>
+                  <option value="Fiction">Fiction</option>
+                  <option value="Non-Fiction">Non-Fiction</option>
+                  <option value="Others">Others</option>
+                </Select>
+              </FormControl>
+              <FormControl id="name" isRequired marginTop="20px">
+                <FormLabel>Price of the Book (In GWEI)</FormLabel>
+                <Input
+                  variant="filled"
+                  type="number"
+                  onChange={handleChange("price")}
+                />
+              </FormControl>
+              <Button
+                isLoading={loading}
+                colorScheme="blue"
+                marginTop="20px"
+                onClick={submit}
+                size="lg"
+              >
+                Add Book
+              </Button>
+            </Container>
+          </Box>
+        </div>
+      </Base>
     );
   };
 
