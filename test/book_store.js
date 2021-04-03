@@ -61,5 +61,24 @@ contract('BookStore',()=>{
     assert.deepEqual(bids,['0x4fc91b7ad52938ac129f34c5f334bc58229d399788ed253e832a74b8ff386597','0x281271bc23cbb04bce6e6a805ceaac08f1e43dec98d993a98f73ee33808c28da','0x54826de935030f85f6568c475c404999f32476f2faff5d2fd7fb3f7af4eeafe3']);
     
   });
+  /*it('Books should be bought',async()=>{
+    await bookStore.buyBook('0x4fc91b7ad52938ac129f34c5f334bc58229d399788ed253e832a74b8ff386597',"Manasa","Address1",500049,1234567809,{from:accounts[1],value:1000});
+    const ord=await bookStore.getOrderById('0x4fc91b7ad52938ac129f34c5f334bc58229d399788ed253e832a74b8ff386597');
+    assert(ord[0]==='0x4fc91b7ad52938ac129f34c5f334bc58229d399788ed253e832a74b8ff386597');
+    assert(ord[1]==='Manasa');
+    assert(ord[2]==='Address1');
+    assert(ord[3]==='500045');
+    assert(ord[4]==='1234567809');
+    assert(ord[5]==='pending');
+    assert(ord[6]==='0x0000000000000000000000000000000000000000');
+    assert(ord[7]==='b1');
+    assert(ord[8]==='0xb9CbfB74917fD9b7B67525F6AFb6EC29998B6680');
+    
+  });
+  it('Order should be marked as completed',async()=>{
+    await bookStore.markOrderCompleted('0x4fc91b7ad52938ac129f34c5f334bc58229d399788ed253e832a74b8ff386597');
+    const orders=await bookStore.getOrderLists();
+    assert.deepEqual(orders,['0x0000000000000000000000000000000000000000000000000000000000000000']);
+  });*/
 
 });
