@@ -14,7 +14,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 - ### Checkout to the front end branch
   ```bash
-  cd Blockchain-Buyer-Seller-Market-BC_Team_6 &&git checkout front-end
+  cd Blockchain-Buyer-Seller-Market-BC_Team_6/frontend
   ```
 - ### Install the dependencies
   ```bash
