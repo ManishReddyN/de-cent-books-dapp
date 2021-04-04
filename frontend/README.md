@@ -8,14 +8,22 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 - ### Clone the repository locally
 
-  ### `git clone https://github.com/iamneowise/Blockchain-Buyer-Seller-Market-BC_Team_6.git`
+  ```bash
+  git clone https://github.com/iamneowise/Blockchain-Buyer-Seller-Market-BC_Team_6.git
+  ```
 
 - ### Checkout to the front end branch
-  ### `cd Blockchain-Buyer-Seller-Market-BC_Team_6 &&git checkout front-end`
+  ```bash
+  cd Blockchain-Buyer-Seller-Market-BC_Team_6 &&git checkout front-end
+  ```
 - ### Install the dependencies
-  ### `npm i`
+  ```bash
+  npm i
+  ```
 - ### Start the application locally
-  ### `npm start`
+  ```bash
+  npm start
+  ```
 
 ---
 
