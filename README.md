@@ -12,23 +12,26 @@ npm install -g ganache-cli
 ### Cloning Latest Updates
 
 ```bash
-git clone https://github.com/iamneowise/Blockchain-Buyer-Seller-Market-BC_Team_6.git
+git clone https://github.com/iamneowise/Blockchain-Buyer-Seller-Market-BC_Team_6.git && cd Blockchain-Buyer-Seller-Market-BC_Team_6
 ```
 ### Deploying in your Machine
-
-Go into Truffle Console by 
+Start Ganache CLI
 ```bash
-truffle develop
+ganache-cli
+```
+Start a new terminal in the same directory and go into Truffle Console by 
+```bash
+truffle console
 ```
 
 Use the migrate command to run migrations(if not done before)
 ```bash
-truffle(develop)> migrate
+truffle(development)> migrate
 ```
 
 #### Output
 ```text
-truffle(develop)> migrate
+truffle(development)> migrate
 
 Compiling your contracts...
 ===========================
@@ -96,17 +99,17 @@ Summary
 ```
 ### Create a BookStore Contract instance.
 ```bash
-truffle(develop)> BookStore.deployed().then(function(instance){app=instance})
+truffle(development)> BookStore.deployed().then(function(instance){app=instance})
 ```
 You can use the following command to verify
 ```bash
-truffle(develop)> app
+truffle(development)> app
 ```
 
 ### Now that you have the Contract instance, you can call the functions in the contract as follows
 e.g. Adding A Book to the Block
 ```bash
-truffle(develop)> app.addBook("Test","Testt","Sameer","Fiction",12,false,"https://www.google.com/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FMetaMask&psig=AOvVaw01YKJ1Z0HUnd4AxTrJCq9u&ust=1617105710033000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMCQg6261e8CFQAAAAAdAAAAABAD");
+truffle(development)> app.addBook("Test","Testt","Sameer","Fiction",12,false,"https://www.google.com/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FMetaMask&psig=AOvVaw01YKJ1Z0HUnd4AxTrJCq9u&ust=1617105710033000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMCQg6261e8CFQAAAAAdAAAAABAD");
 ```
 
 #### Output
