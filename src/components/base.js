@@ -572,7 +572,7 @@ export default function Base({ children }) {
           </Box>
         ) : null}
       </Box>
-      <Box>{children}</Box>
+      <Box minH="75vh">{children}</Box>
       <Footer />
     </>
   );

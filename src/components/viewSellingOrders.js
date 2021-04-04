@@ -105,7 +105,7 @@ function ViewSellingOrders() {
           />
         </Center>
       )}
-      <SimpleGrid minChildWidth="xl" spacing="30px">
+      <SimpleGrid minChildWidth="300px" spacing="20px">
         {orders &&
           orders.map(
             (pOrder, index) =>
