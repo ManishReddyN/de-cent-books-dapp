@@ -5,6 +5,7 @@ import {
   Center,
   Divider,
   Flex,
+  Heading,
   SimpleGrid,
   Text,
 } from "@chakra-ui/layout";
@@ -39,6 +40,7 @@ function ViewBuyingOrders() {
     let ordersIdsList = [];
     let ordersList = [];
     try {
+      console.log(await bookStoreContract.methods.getSentAddress().call());
       ordersIdsList = await bookStoreContract.methods.getOrdersLists().call();
       console.log(ordersIdsList);
       for (let i = 0; i < ordersIdsList.length; i++) {
@@ -62,6 +64,11 @@ function ViewBuyingOrders() {
 
   return (
     <Base>
+      <Box textAlign="center">
+        <Heading size="lg" marginTop="20px" color="#8ac5eb">
+          Orders
+        </Heading>
+      </Box>
       {loading && (
         <Center>
           <Spinner

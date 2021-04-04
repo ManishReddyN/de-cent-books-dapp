@@ -63,7 +63,7 @@ const BookCard = ({
           </Text>
           <Stack direction={"row"} align={"center"}>
             <Text fontWeight={800} fontSize={"xl"}>
-              {price}
+              {price} GWEI
             </Text>
           </Stack>
         </Stack>

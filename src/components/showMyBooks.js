@@ -4,10 +4,12 @@ import {
   Center,
   Grid,
   GridItem,
+  Heading,
   HStack,
   SimpleGrid,
   Stack,
 } from "@chakra-ui/layout";
+import { Spinner } from "@chakra-ui/spinner";
 import { useToast } from "@chakra-ui/toast";
 import React, { useEffect, useState } from "react";
 import Web3 from "web3";
@@ -26,6 +28,7 @@ export default function ShowMyBooks() {
   const [books, setBooks] = useState([]);
 
   async function loadBlockchainData() {
+    setLoading(true);
     const web3 = new Web3(Web3.givenProvider || "http://localhost:8545");
     const accounts = await web3.eth.getAccounts();
     setAccount(accounts[0]);
@@ -45,6 +48,7 @@ export default function ShowMyBooks() {
     }
     setBooks(booksToDisplay);
     console.log(booksToDisplay);
+    setLoading(false);
     setBooksLoaded(true);
   }
 
@@ -130,8 +134,22 @@ export default function ShowMyBooks() {
   return (
     <Base>
       <div>
-        {error && errorMessage()}
-        {message && successMessage()}
+        <Box textAlign="center">
+          <Heading size="lg" marginTop="20px" color="#8ac5eb">
+            My Books
+          </Heading>
+        </Box>
+        {loading && (
+          <Center>
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="blue.500"
+              size="xl"
+            />
+          </Center>
+        )}
         <SimpleGrid minChildWidth="350px" spacing="24px">
           {books.map((book) => {
             if (book.owner === account) {

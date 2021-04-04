@@ -5,10 +5,12 @@ import {
   Center,
   Divider,
   Flex,
+  Heading,
   SimpleGrid,
   Text,
 } from "@chakra-ui/layout";
 import { Spinner } from "@chakra-ui/spinner";
+import { Tag, TagLabel, TagLeftIcon } from "@chakra-ui/tag";
 import { useToast } from "@chakra-ui/toast";
 import { useEffect, useState } from "react";
 import Web3 from "web3";
@@ -87,6 +89,11 @@ function ViewSellingOrders() {
   };
   return (
     <Base>
+      <Box textAlign="center">
+        <Heading size="lg" marginTop="20px" color="#8ac5eb">
+          Seller Dashboard
+        </Heading>
+      </Box>
       {loading && (
         <Center>
           <Spinner
@@ -100,51 +107,76 @@ function ViewSellingOrders() {
       )}
       <SimpleGrid minChildWidth="xl" spacing="30px">
         {orders &&
-          orders.map((pOrder, index) => (
-            <Box as="section" py="12" borderColor="blue.900">
-              <Box maxW={{ base: "xl", md: "xl" }} mx="auto" px={{ md: "8" }}>
-                <Box
-                  maxW="3xl"
-                  mx="auto"
-                  rounded={{ md: "lg" }}
-                  shadow="base"
-                  overflow="hidden"
-                  padding="10px"
-                >
-                  <Flex align="center" justify="space-between" px="6" py="4">
-                    <Text as="h3" fontWeight="bold" fontSize="lg">
-                      Order #{index + 1} Info
-                    </Text>
-                    {pOrder.state === "pending" && (
-                      <Button
-                        variant="outline"
-                        minW="20"
-                        leftIcon={<CheckCircleIcon />}
-                        onClick={() => markAsDelivered(pOrder.orderId)}
+          orders.map(
+            (pOrder, index) =>
+              pOrder.seller === account && (
+                <Box as="section" py="12" borderColor="blue.900">
+                  <Box
+                    maxW={{ base: "xl", md: "xl" }}
+                    mx="auto"
+                    px={{ md: "8" }}
+                  >
+                    <Box
+                      maxW="3xl"
+                      mx="auto"
+                      rounded={{ md: "lg" }}
+                      shadow="base"
+                      overflow="hidden"
+                      padding="10px"
+                    >
+                      <Flex
+                        align="center"
+                        justify="space-between"
+                        px="6"
+                        py="4"
                       >
-                        Mark As Delivered
-                      </Button>
-                    )}
-                  </Flex>
-                  <Divider />
-                  <Box>
-                    <Description title="Name" value={pOrder.name} />
-                    <Description
-                      title="Address"
-                      value={
-                        pOrder.deliveryAddress +
-                        ", Postal Code: " +
-                        pOrder.postalCode
-                      }
-                    />
-                    <Description title="Phone" value={pOrder.phone} />
-                    <Description title="Book Details" value={pOrder.bookName} />
-                    <Description title="Status" value={pOrder.state} />
+                        <Text as="h3" fontWeight="bold" fontSize="lg">
+                          Order #{index + 1} Info
+                        </Text>
+                        {pOrder.state === "pending" && (
+                          <Button
+                            variant="outline"
+                            minW="20"
+                            leftIcon={<CheckCircleIcon />}
+                            onClick={() => markAsDelivered(pOrder.orderId)}
+                          >
+                            Mark As Delivered
+                          </Button>
+                        )}
+                        {pOrder.state === "completed" && (
+                          <Tag
+                            variant="outline"
+                            minW="20"
+                            size="lg"
+                            colorScheme="green"
+                          >
+                            <TagLeftIcon as={CheckCircleIcon} />
+                            <TagLabel>Delivered</TagLabel>
+                          </Tag>
+                        )}
+                      </Flex>
+                      <Divider />
+                      <Box>
+                        <Description title="Name" value={pOrder.name} />
+                        <Description
+                          title="Address"
+                          value={
+                            pOrder.deliveryAddress +
+                            ", Postal Code: " +
+                            pOrder.postalCode
+                          }
+                        />
+                        <Description title="Phone" value={pOrder.phone} />
+                        <Description
+                          title="Book Details"
+                          value={pOrder.bookName}
+                        />
+                      </Box>
+                    </Box>
                   </Box>
                 </Box>
-              </Box>
-            </Box>
-          ))}
+              )
+          )}
       </SimpleGrid>
     </Base>
   );
