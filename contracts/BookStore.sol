@@ -87,7 +87,6 @@ contract BookStore {
         bookById[_id].forSale = true;
         booksForSale[_id] = _id;
     }
-
     function unSellBook(bytes32 _id) public {
         require(bookExists[_id] == true, "Book doesn't exist");
         bookById[_id].forSale = false;
@@ -113,7 +112,7 @@ contract BookStore {
         bytes32 id =
             sha256(abi.encodePacked(_name, _id, _deliveryAddress, customer)); // using name, book id , delivery address and customer address to make order id
         Book memory b = bookById[_id]; //Need to retrieve the book by it's id.
-        string memory bookName = b.title;
+        string memory bookName=b.title;
         Order memory newOrder =
             Order(
                 id,
@@ -156,10 +155,11 @@ contract BookStore {
         bookById[order.bookId].owner = address(uint160(customer));
         previousOwners[book.id].push(msg.sender);
         bytes32 bookId = ownerProducts[msg.sender][book.id];
-        bookById[book.id].forSale = false;
-        bookById[book.id].sold = false;
+        bookById[book.id].forSale=false;
+        bookById[book.id].sold=false;
         ownerProducts[customer][bookId] = bookId;
     }
+
 
     function getBooksIds(int256 _limit) public view returns (bytes32[] memory) {
         int256 length = int256(books.length);
@@ -201,6 +201,7 @@ contract BookStore {
             address payable owner,
             uint256 price,
             bool forSale,
+            bool sold,
             string memory image
         )
     {
@@ -213,8 +214,11 @@ contract BookStore {
         owner = b.owner;
         price = b.price;
         forSale = b.forSale;
+        sold=b.sold;
         image = b.image;
     }
+
+    
 
     function getBooksForSale(uint256 _limit)
         public
@@ -227,12 +231,9 @@ contract BookStore {
         uint256 inc = 0;
         for (uint256 i = 0; i < length; i++) {
             bytes32 id = booksForSale[books[i]];
-            if (
-                id !=
-                0x0000000000000000000000000000000000000000000000000000000000000000
-            ) {
+            if (id != 0x0000000000000000000000000000000000000000000000000000000000000000 && bookById[id].forSale==true && bookById[id].sold==false) {
                 ids[inc] = id;
-                inc++;
+                inc ++;
                 if (inc > _limit) {
                     break;
                 }
@@ -240,8 +241,15 @@ contract BookStore {
         }
         return ids;
     }
+    function getSentAddress() public view returns (address){
+        return msg.sender;
+    }
 
-    function getOrdersLists() public view returns (bytes32[] memory) {
+    function getOrdersLists()
+        public
+        view
+        returns (bytes32[] memory)
+    {
         return orders;
     }
 
@@ -269,15 +277,7 @@ contract BookStore {
         phone = o.phone;
         state = o.state;
         customer = o.customer;
-        bookName = o.bookName;
-        seller = o.seller;
-    }
-
-    function compareStrings(string memory a, string memory b)
-        public
-        pure
-        returns (bool)
-    {
-        return keccak256(abi.encodePacked(a)) == keccak256(abi.encodePacked(b));
+        bookName=o.bookName;
+        seller=o.seller;
     }
 }
