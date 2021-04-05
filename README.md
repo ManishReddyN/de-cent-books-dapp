@@ -267,7 +267,7 @@ Result {
 
 ### Mark the Order as Completed (Seller Exclusive)
 ```bash
-app.markOrderCompleted(order2);
+app.markOrderCompleted(order1);
 ```
 ##### Updated Order Info:
 ```text
