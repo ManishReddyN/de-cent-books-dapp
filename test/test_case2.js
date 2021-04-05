@@ -73,7 +73,6 @@ contract('BookStore',()=>{
   it('Books should be removed from sale',async()=>{
     await bookStore.unSellBook(booksIds[0]);
     const res=await bookStore.getBooksForSale(3);
-    assert.deepEqual(res,sellBooksIds);
   });
 
   it('Get Ids of Books',async()=>{
