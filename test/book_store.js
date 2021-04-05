@@ -1,84 +1,102 @@
 const BookStore = artifacts.require("BookStore");
+//const accounts =  web3.eth.getAccounts();
 contract('BookStore',()=>{
-  let bookStore=null;
+  let bookStore = null;
+  var booksIds = null;
+  var sellBooksIds = [];
+  var addBooksIds = []
   before(async () => {
     bookStore=await BookStore.deployed();
+    
   });
   it('Books should be added',async()=>{
-    await bookStore.addBook("Test","abc","Manasa","Mystery",1000,false,"https://www.google.com/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FMetaMask&psig=AOvVaw01YKJ1Z0HUnd4AxTrJCq9u&ust=1617105710033000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMCQg6261e8CFQAAAAAdAAAAABAD");
-    const result=await bookStore.getBook('0x4fc91b7ad52938ac129f34c5f334bc58229d399788ed253e832a74b8ff386597');
-    assert(result[0]==='0x4fc91b7ad52938ac129f34c5f334bc58229d399788ed253e832a74b8ff386597');
-    assert(result[1]==='Test');
-    assert(result[2]==='abc');
-    assert(result[3]==='Manasa');
-    assert(result[4]==='Mystery');
-    assert(result[5]==='0xb9CbfB74917fD9b7B67525F6AFb6EC29998B6680');
-    assert(result[6].toNumber()===1000);
+    const accounts = await web3.eth.getAccounts();
+    await bookStore.addBook("Test1","Testt1","Sai1","Fiction",19,false,"https://www.google.com/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FMetaMask&psig=AOvVaw01YKJ1Z0HUnd4AxTrJCq9u&ust=1617105710033000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMCQg6261e8CFQAAAAAdAAAAABAD");
+    booksIds = await bookStore.getBooksIds(await bookStore.noOfBooks());
+    //console.log(booksIds[0]);
+    addBooksIds.push(booksIds[0]);
+    const result = await bookStore.getBook(booksIds[0]);
+    assert(result[0]===booksIds[0]);
+    assert(result[1]==='Test1');
+    assert(result[2]==='Testt1');
+    assert(result[3]==='Sai1');
+    assert(result[4]==='Fiction');
+    assert(result[5]===accounts[0]);
+    assert(result[6].toNumber()===19);
     assert(result[7]===false);
     assert(result[8]==="https://www.google.com/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FMetaMask&psig=AOvVaw01YKJ1Z0HUnd4AxTrJCq9u&ust=1617105710033000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMCQg6261e8CFQAAAAAdAAAAABAD");
     
-    await bookStore.addBook("Test1","xyz","Tina","Horror",1000,false,"https://www.google.com/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FMetaMask&psig=AOvVaw01YKJ1Z0HUnd4AxTrJCq9u&ust=1617105710033000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMCQg6261e8CFQAAAAAdAAAAABAD");
-    const result1=await bookStore.getBook('0x281271bc23cbb04bce6e6a805ceaac08f1e43dec98d993a98f73ee33808c28da');
-    assert(result1[0]==='0x281271bc23cbb04bce6e6a805ceaac08f1e43dec98d993a98f73ee33808c28da');
-    assert(result1[1]==='Test1');
-    assert(result1[2]==='xyz');
-    assert(result1[3]==='Tina');
-    assert(result1[4]==='Horror');
-    assert(result1[5]==='0xb9CbfB74917fD9b7B67525F6AFb6EC29998B6680');
-    assert(result1[6].toNumber()===1000);
+    await bookStore.addBook("Test2","Testt2","Sai2","Fiction",18,false,"https://www.google.com/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FMetaMask&psig=AOvVaw01YKJ1Z0HUnd4AxTrJCq9u&ust=1617105710033000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMCQg6261e8CFQAAAAAdAAAAABAD");
+    booksIds = await bookStore.getBooksIds(await bookStore.noOfBooks());
+    addBooksIds.push(booksIds[1]);
+    const result1=await bookStore.getBook(booksIds[1]);
+    assert(result1[0]===booksIds[1]);
+    assert(result1[1]==='Test2');
+    assert(result1[2]==='Testt2');
+    assert(result1[3]==='Sai2');
+    assert(result1[4]==='Fiction');
+    assert(result1[5]===accounts[0]);
+    assert(result1[6].toNumber()===18);
     assert(result1[7]===false);
     assert(result1[8]==="https://www.google.com/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FMetaMask&psig=AOvVaw01YKJ1Z0HUnd4AxTrJCq9u&ust=1617105710033000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMCQg6261e8CFQAAAAAdAAAAABAD");
   
-    await bookStore.addBook("Test2","ijk","John","Fiction",100,true,"https://www.google.com/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FMetaMask&psig=AOvVaw01YKJ1Z0HUnd4AxTrJCq9u&ust=1617105710033000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMCQg6261e8CFQAAAAAdAAAAABAD");
-    const result2=await bookStore.getBook('0x54826de935030f85f6568c475c404999f32476f2faff5d2fd7fb3f7af4eeafe3');
-    assert(result2[0]==='0x54826de935030f85f6568c475c404999f32476f2faff5d2fd7fb3f7af4eeafe3');
-    assert(result2[1]==='Test2');
-    assert(result2[2]==='ijk');
-    assert(result2[3]==='John');
+    await bookStore.addBook("Test3","Testt3","Sai3","Fiction",1918,true,"https://www.google.com/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FMetaMask&psig=AOvVaw01YKJ1Z0HUnd4AxTrJCq9u&ust=1617105710033000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMCQg6261e8CFQAAAAAdAAAAABAD");
+    booksIds = await bookStore.getBooksIds(await bookStore.noOfBooks());
+    addBooksIds.push(booksIds[2]);
+    const result2=await bookStore.getBook(booksIds[2]);
+    assert(result2[0]===booksIds[2]);
+    assert(result2[1]==='Test3');
+    assert(result2[2]==='Testt3');
+    assert(result2[3]==='Sai3');
     assert(result2[4]==='Fiction');
-    assert(result2[5]==='0xb9CbfB74917fD9b7B67525F6AFb6EC29998B6680');
-    assert(result2[6].toNumber()===100);
+    assert(result2[5]===accounts[0]);
+    assert(result2[6].toNumber()===1918);
     assert(result2[7]===true);
     assert(result2[8]==="https://www.google.com/url?sa=i&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FMetaMask&psig=AOvVaw01YKJ1Z0HUnd4AxTrJCq9u&ust=1617105710033000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCMCQg6261e8CFQAAAAAdAAAAABAD");
+    
   });
 
   it('Books should be added for sale',async()=>{
-    await bookStore.sellBook('0x4fc91b7ad52938ac129f34c5f334bc58229d399788ed253e832a74b8ff386597');
-    await bookStore.sellBook('0x281271bc23cbb04bce6e6a805ceaac08f1e43dec98d993a98f73ee33808c28da');
+    await bookStore.sellBook(booksIds[0]);
+    await bookStore.sellBook(booksIds[1]);
+    sellBooksIds.push(booksIds[0]);
+    sellBooksIds.push(booksIds[1]);
     const res=await bookStore.getBooksForSale(2);
-    assert.deepEqual(res,['0x4fc91b7ad52938ac129f34c5f334bc58229d399788ed253e832a74b8ff386597','0x281271bc23cbb04bce6e6a805ceaac08f1e43dec98d993a98f73ee33808c28da']);
+    assert.deepEqual(res,sellBooksIds);
     
   });
 
   it('Books should be removed from sale',async()=>{
-    await bookStore.unSellBook('0x4fc91b7ad52938ac129f34c5f334bc58229d399788ed253e832a74b8ff386597');
+    await bookStore.unSellBook(booksIds[0]);
+    //sellBooksIds.pop(booksIds[0]);
     const res=await bookStore.getBooksForSale(2);
-    assert.deepEqual(res,['0x4fc91b7ad52938ac129f34c5f334bc58229d399788ed253e832a74b8ff386597','0x281271bc23cbb04bce6e6a805ceaac08f1e43dec98d993a98f73ee33808c28da']);
-    
+    assert.deepEqual(res,sellBooksIds);
   });
+
   it('Get Ids of Books',async()=>{
-    const bids=await bookStore.getBooksIds(3);
-    assert.deepEqual(bids,['0x4fc91b7ad52938ac129f34c5f334bc58229d399788ed253e832a74b8ff386597','0x281271bc23cbb04bce6e6a805ceaac08f1e43dec98d993a98f73ee33808c28da','0x54826de935030f85f6568c475c404999f32476f2faff5d2fd7fb3f7af4eeafe3']);
-    
+    var booksAdded = await bookStore.noOfBooks();
+    const bids=await bookStore.getBooksIds(booksAdded);
+    assert.deepEqual(bids,addBooksIds);
   });
-  /*it('Books should be bought',async()=>{
-    await bookStore.buyBook('0x4fc91b7ad52938ac129f34c5f334bc58229d399788ed253e832a74b8ff386597',"Manasa","Address1",500049,1234567809,{from:accounts[1],value:1000});
-    const ord=await bookStore.getOrderById('0x4fc91b7ad52938ac129f34c5f334bc58229d399788ed253e832a74b8ff386597');
-    assert(ord[0]==='0x4fc91b7ad52938ac129f34c5f334bc58229d399788ed253e832a74b8ff386597');
-    assert(ord[1]==='Manasa');
-    assert(ord[2]==='Address1');
-    assert(ord[3]==='500045');
-    assert(ord[4]==='1234567809');
-    assert(ord[5]==='pending');
-    assert(ord[6]==='0x0000000000000000000000000000000000000000');
-    assert(ord[7]==='b1');
-    assert(ord[8]==='0xb9CbfB74917fD9b7B67525F6AFb6EC29998B6680');
+  // it('Books should be bought',async()=>{
+  //   const accounts = await web3.eth.getAccounts();
+  //   await bookStore.buyBook('0x2e1ed7a0af3e4d13718058a5b7db0699dc1e40bbec6a1b1a0ad1176bf7db4597',"Sai3","Address1",522614,1234567809,{from:accounts[0],value:1000});
+  //   const ord=await bookStore.getOrderById('0x2e1ed7a0af3e4d13718058a5b7db0699dc1e40bbec6a1b1a0ad1176bf7db4597');
+  //   assert(ord[0]==='0x2e1ed7a0af3e4d13718058a5b7db0699dc1e40bbec6a1b1a0ad1176bf7db4597');
+  //   assert(ord[1]==='Sai3');
+  //   assert(ord[2]==='Address1');
+  //   assert(ord[3]==='522614');
+  //   assert(ord[4]==='1234567809');
+  //   assert(ord[5]==='pending');
+  //   assert(ord[6]==='0x0000000000000000000000000000000000000000');
+  //   assert(ord[7]==='b1');
+  //   assert(ord[8]===accounts[0]);
     
-  });
-  it('Order should be marked as completed',async()=>{
-    await bookStore.markOrderCompleted('0x4fc91b7ad52938ac129f34c5f334bc58229d399788ed253e832a74b8ff386597');
-    const orders=await bookStore.getOrderLists();
-    assert.deepEqual(orders,['0x0000000000000000000000000000000000000000000000000000000000000000']);
-  });*/
+  // });
+  // it('Order should be marked as completed',async()=>{
+  //   await bookStore.markOrderCompleted('0x2e1ed7a0af3e4d13718058a5b7db0699dc1e40bbec6a1b1a0ad1176bf7db4597');
+  //   const orders=await bookStore.getOrderLists();
+  //   assert.deepEqual(orders,['0x0000000000000000000000000000000000000000000000000000000000000000']);
+  // });
 
 });
