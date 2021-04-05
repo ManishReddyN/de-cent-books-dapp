@@ -1,5 +1,9 @@
 # README
 
+## The Contract is hosted on the Rinkeby Test Net - https://rinkeby.etherscan.io/address/0xe0c5367e3b3b9402b7f5e52f31d8ec584893074a
+
+### You can start using the application directly by starting the front end application. `Follow Readme in frontend folder`.
+
 ## Steps to Run the Backend locally
 
 ### Install Truffle and Ganache-Cli on the machine
