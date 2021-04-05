@@ -17,7 +17,7 @@ contract('BookStore',(accounts)=>{
     assert(result[5]===accounts[0]);
     assert(result[6].toNumber()===1000);
     assert(result[7]===false);
-    //assert(result[8]==="https://www.google.com/search?q=mystery+books&rlz=1C1CHBD_enIN834IN834&sxsrf=ALeKk03-EpaWvDv3AS7b4BobtZg9sunw0Q:1617541542485&source=lnms&tbm=isch&sa=X&ved=2ahUKEwio8LHo0-TvAhWwumMGHU3VAwYQ_AUoA3oECAEQBQ&biw=1536&bih=722#imgrc=pH_uHUk21XLXJM");
+    assert(result[9]==="https://www.google.com/search?q=mystery+books&rlz=1C1CHBD_enIN834IN834&sxsrf=ALeKk03-EpaWvDv3AS7b4BobtZg9sunw0Q:1617541542485&source=lnms&tbm=isch&sa=X&ved=2ahUKEwio8LHo0-TvAhWwumMGHU3VAwYQ_AUoA3oECAEQBQ&biw=1536&bih=722#imgrc=pH_uHUk21XLXJM");
     
     await bookStore.addBook("Test1","xyz","Tina","Horror",1000,false,"https://www.google.com/search?q=horror+books&tbm=isch&ved=2ahUKEwjTxZfr0-TvAhXOJCsKHX7qAWwQ2-cCegQIABAA&oq=horr+books&gs_lcp=CgNpbWcQARgAMgYIABAHEB4yBggAEAcQHjIGCAAQBxAeMgYIABAHEB4yBggAEAcQHjIGCAAQBxAeMgYIABAHEB4yBggAEAcQHjIGCAAQBxAeMgYIABAHEB46BwgAELEDEEM6BAgAEEM6BQgAELEDOgIIAFCC7QtY-P4LYKWMDGgAcAB4AIABlQGIAZkEkgEDMi4zmAEAoAEBqgELZ3dzLXdpei1pbWfAAQE&sclient=img&ei=rLlpYNO_FM7JrAH-1IfgBg&bih=722&biw=1536&rlz=1C1CHBD_enIN834IN834");
     await bookStore.getBooksIds(2).then(result => {book2 = result[1]});
@@ -30,7 +30,7 @@ contract('BookStore',(accounts)=>{
     assert(result1[5]===accounts[0]);
     assert(result1[6].toNumber()===1000);
     assert(result1[7]===false);
-    //assert(result1[8]==="https://www.google.com/search?q=horror+books&tbm=isch&ved=2ahUKEwjTxZfr0-TvAhXOJCsKHX7qAWwQ2-cCegQIABAA&oq=horr+books&gs_lcp=CgNpbWcQARgAMgYIABAHEB4yBggAEAcQHjIGCAAQBxAeMgYIABAHEB4yBggAEAcQHjIGCAAQBxAeMgYIABAHEB4yBggAEAcQHjIGCAAQBxAeMgYIABAHEB46BwgAELEDEEM6BAgAEEM6BQgAELEDOgIIAFCC7QtY-P4LYKWMDGgAcAB4AIABlQGIAZkEkgEDMi4zmAEAoAEBqgELZ3dzLXdpei1pbWfAAQE&sclient=img&ei=rLlpYNO_FM7JrAH-1IfgBg&bih=722&biw=1536&rlz=1C1CHBD_enIN834IN834");
+    assert(result1[9]==="https://www.google.com/search?q=horror+books&tbm=isch&ved=2ahUKEwjTxZfr0-TvAhXOJCsKHX7qAWwQ2-cCegQIABAA&oq=horr+books&gs_lcp=CgNpbWcQARgAMgYIABAHEB4yBggAEAcQHjIGCAAQBxAeMgYIABAHEB4yBggAEAcQHjIGCAAQBxAeMgYIABAHEB4yBggAEAcQHjIGCAAQBxAeMgYIABAHEB46BwgAELEDEEM6BAgAEEM6BQgAELEDOgIIAFCC7QtY-P4LYKWMDGgAcAB4AIABlQGIAZkEkgEDMi4zmAEAoAEBqgELZ3dzLXdpei1pbWfAAQE&sclient=img&ei=rLlpYNO_FM7JrAH-1IfgBg&bih=722&biw=1536&rlz=1C1CHBD_enIN834IN834");
   
     await bookStore.addBook("Test2","ijk","John","Fiction",100,true,"https://www.google.com/search?q=fiction+books&tbm=isch&ved=2ahUKEwjerarK1OTvAhXCTCsKHf-aDWcQ2-cCegQIABAA&oq=fiction+&gs_lcp=CgNpbWcQARgAMgQIABBDMgQIABBDMgQIABBDMgQIABBDMgQIABBDMgIIADICCAAyAggAMgIIADICCAA6BwgjEOoCECc6BAgjECc6BQgAELEDOgcIABCxAxBDUNu7Flio4hZgte8WaAFwAHgAgAGkAYgBqwaSAQM2LjKYAQCgAQGqAQtnd3Mtd2l6LWltZ7ABCsABAQ&sclient=img&ei=c7ppYJ6oNcKZrQH_tba4Bg&bih=722&biw=1536&rlz=1C1CHBD_enIN834IN834");
     await bookStore.getBooksIds(3).then(result => {book3 = result[2]});
