@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Alert, AlertIcon, AlertTitle } from "@chakra-ui/alert";
 import { Button } from "@chakra-ui/button";
 import { FormErrorIcon } from "@chakra-ui/form-control";

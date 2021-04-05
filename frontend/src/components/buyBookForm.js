@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Alert } from "@chakra-ui/alert";
 import { Button } from "@chakra-ui/button";
 import { FormControl, FormLabel } from "@chakra-ui/form-control";

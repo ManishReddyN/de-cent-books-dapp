@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable array-callback-return */
 import { Button } from "@chakra-ui/button";
 import {
   Box,
