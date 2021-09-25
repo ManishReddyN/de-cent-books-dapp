@@ -16,7 +16,7 @@ npm install -g ganache-cli
 ### Cloning Latest Updates
 
 ```bash
-git clone https://github.com/iamneowise/Blockchain-Buyer-Seller-Market-BC_Team_6.git && cd Blockchain-Buyer-Seller-Market-BC_Team_6
+git clone https://github.com/nmreddy1911/de-cent-books-dapp.git && cd Blockchain-Buyer-Seller-Market-BC_Team_6
 ```
 ### Deploying in your Machine
 Start Ganache CLI
